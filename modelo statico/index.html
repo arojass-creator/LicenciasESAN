@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Control de Licencias ESAN</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<link rel="stylesheet"
+  href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+
+<body>
+
+<!-- BANNER -->
+<div class="banner">
+  <span class="banner-logo">ESAN</span>
+  <div class="banner-sep"></div>
+  <span class="banner-subtitulo">Control de Licencias de Software</span>
+
+  <div class="banner-stats">
+    <div class="stat-chip">
+      <span class="stat-num" id="stat-programas">{{ programas|length }}</span>
+      <span class="stat-lbl">Programas</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-num" id="stat-ambientes">—</span>
+      <span class="stat-lbl">Ambientes</span>
+    </div>
+  </div>
+</div>
+
+<div class="contenedor">
+
+  <!-- PANEL IZQUIERDO -->
+  <div class="panel lista">
+
+    <div class="titulo">
+      <i class="ti ti-apps"></i> Lista de Software
+    </div>
+
+    <div class="buscador-area">
+      <div class="buscador-derecha">
+        <i class="ti ti-search buscador-icono"></i>
+        <input
+          type="text"
+          id="buscador"
+          class="buscador"
+          placeholder="Buscar programa..."
+          onkeyup="filtrarProgramas()">
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table id="tablaProgramas">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre del Programa</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for programa in programas %}
+          <tr onclick="seleccionarPrograma({{ programa.id }}, this)">
+            <td>{{ '%02d'|format(programa.item) }}</td>
+            <td>{{ programa.nombre }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- PANEL AMBIENTES -->
+  <div class="panel panel-ambientes">
+
+    <div class="titulo">
+      <i class="ti ti-building"></i> Ambientes Donde se Usa
+    </div>
+
+    <div id="ambientes">
+      <div class="estado-vacio">
+        <i class="ti ti-building-community"></i>
+        Seleccione un programa
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PANEL DETALLES -->
+  <div class="panel panel-detalles">
+
+    <div class="titulo">
+      <i class="ti ti-info-circle"></i> Detalles del Software
+    </div>
+
+    <div id="detalle">
+      <div class="estado-vacio" style="grid-column:1/-1">
+        <i class="ti ti-file-description"></i>
+        Seleccione un programa
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+async function seleccionarPrograma(id, fila) {
+  document.querySelectorAll("#tablaProgramas tbody tr")
+    .forEach(f => f.classList.remove("seleccionado"));
+  fila.classList.add("seleccionado");
+
+  const respuesta = await fetch("/programa/" + id);
+  const datos = await respuesta.json();
+
+  // Actualizar stat de ambientes en el banner
+  document.getElementById("stat-ambientes").textContent = datos.ambientes.length;
+
+  mostrarAmbientes(datos.ambientes);
+
+  document.getElementById("detalle").innerHTML = `
+    <div class="detalle-card">
+      <span class="detalle-label">Nombre del Programa</span>
+      <span class="detalle-valor">${datos.programa}</span>
+    </div>
+    <div class="detalle-card">
+      <span class="detalle-label">Versión</span>
+      <span class="detalle-valor">${datos.version}</span>
+    </div>
+    <div class="detalle-card">
+      <span class="detalle-label">Tipo de Licencia</span>
+      <span class="detalle-valor">${datos.licencia}</span>
+    </div>
+    <div class="detalle-card">
+      <span class="detalle-label">Cantidad de Licencias</span>
+      <span class="detalle-valor ${datos.cantidad_licencias !== 'Ilimitado' ? 'numero' : ''}">${datos.cantidad_licencias}</span>
+    </div>
+    <div class="detalle-card">
+      <span class="detalle-label">Total Ambientes</span>
+      <span class="detalle-valor">${datos.ambientes.length}</span>
+    </div>
+  `;
+}
+
+function mostrarAmbientes(lista) {
+  if (!lista.length) {
+    document.getElementById("ambientes").innerHTML =
+      '<div class="estado-vacio"><i class="ti ti-mood-empty"></i>Sin ambientes registrados</div>';
+    return;
+  }
+
+  let filas = '';
+  lista.forEach(a => {
+    const esVariado = String(a.aforo).toLowerCase() === 'variado';
+    filas += `<tr>
+      <td>${a.nombre}</td>
+      <td><span class="aforo-badge${esVariado ? ' variado' : ''}">${a.aforo}</span></td>
+    </tr>`;
+  });
+
+  document.getElementById("ambientes").innerHTML = `
+    <table class="tablaAmbientes">
+      <thead>
+        <tr>
+          <th>Laboratorio</th>
+          <th>Aforo</th>
+        </tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+}
+
+function filtrarProgramas() {
+  const texto = document.getElementById("buscador").value.toLowerCase();
+  document.querySelectorAll("#tablaProgramas tbody tr").forEach(fila => {
+    fila.style.display = fila.innerText.toLowerCase().includes(texto) ? "" : "none";
+  });
+}
+</script>
+
+</body>
+</html>

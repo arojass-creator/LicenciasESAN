@@ -1,0 +1,5 @@
+1.-abrir cmd e ingresar a la ruta C:\Proyectos\LicenciasESAN
+2.-ejecutar   venv\Scripts\activate 
+(opcional)   python -m venv venv
+4.-ejecutar   python app.py
+5.-desde la web entra http://localhost:8080
