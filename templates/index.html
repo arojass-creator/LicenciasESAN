@@ -9,7 +9,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 
 <link rel="stylesheet"
 href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -38,9 +38,21 @@ href="{{ url_for('static', filename='css/estilos.css') }}">
 
 <div class="banner">
 
-    <span class="banner-logo">ESAN</span>
+    <div class="banner-rojo">
+        <svg width="50" height="50" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="26" r="24" stroke="white" stroke-width="2.5" fill="none"/>
+            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="white"/>
+            <polygon points="26,10 20,22 32,22" fill="white"/>
+            <polygon points="26,16 18,28 34,28" fill="white"/>
+            <polygon points="26,22 17,34 35,34" fill="white"/>
+        </svg>
+        <div>
+            <span class="banner-univ">Universidad</span>
+            <span class="banner-logo">ESAN</span>
+        </div>
+    </div>
 
-    <span class="banner-subtitulo">Control de Licencias de Software</span>
+    <span class="banner-subtitulo">Visualización de Software</span>
 
 </div>
 
