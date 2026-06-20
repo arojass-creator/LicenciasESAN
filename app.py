@@ -34,11 +34,18 @@ def programa(id_programa):
 
     df_aforo = pd.read_excel(ARCHIVO_EXCEL, sheet_name="AFORO")
     aforo_dict = {}
+    tiene_tipo = "TIPO LABORATORIO" in df_aforo.columns
     for _, fila_aforo in df_aforo.iterrows():
-        aforo_dict[fila_aforo["Laboratorio"]] = {
-            "capacidad": fila_aforo["Capacidad"],
-            "piso":      str(fila_aforo["PISO"]).strip()      if pd.notna(fila_aforo["PISO"])     else "—",
-            "edificio":  str(fila_aforo["EDIFICIO"]).strip()  if pd.notna(fila_aforo["EDIFICIO"]) else "—",
+        piso     = str(fila_aforo["PISO"]).strip()      if pd.notna(fila_aforo["PISO"])      else "—"
+        edificio = str(fila_aforo["EDIFICIO"]).strip()  if pd.notna(fila_aforo["EDIFICIO"])  else "—"
+        tipo     = str(fila_aforo["TIPO LABORATORIO"]).strip() if tiene_tipo and pd.notna(fila_aforo["TIPO LABORATORIO"]) else "—"
+        ubicacion = f"Piso {piso} del Edificio {edificio}" if piso != "—" and edificio != "—" else "—"
+        aforo_dict[fila_aforo["LABORATORIO"]] = {
+            "capacidad": fila_aforo["CAPACIDAD"],
+            "piso":      piso,
+            "edificio":  edificio,
+            "tipo":      tipo,
+            "ubicacion": ubicacion,
         }
 
     fila = df.iloc[id_programa]
@@ -55,20 +62,28 @@ def programa(id_programa):
                 capacidad = "Variado"
                 piso      = "—"
                 edificio  = "—"
+                tipo      = "—"
+                ubicacion = "—"
             elif columna in aforo_dict:
                 capacidad = int(aforo_dict[columna]["capacidad"])
                 piso      = aforo_dict[columna]["piso"]
                 edificio  = aforo_dict[columna]["edificio"]
+                tipo      = aforo_dict[columna]["tipo"]
+                ubicacion = aforo_dict[columna]["ubicacion"]
             else:
                 capacidad = "—"
                 piso      = "—"
                 edificio  = "—"
+                tipo      = "—"
+                ubicacion = "—"
 
             ambientes.append({
-                "nombre":   str(columna),
-                "aforo":    capacidad,
-                "piso":     piso,
-                "edificio": edificio,
+                "nombre":    str(columna),
+                "aforo":     capacidad,
+                "piso":      piso,
+                "edificio":  edificio,
+                "tipo":      tipo,
+                "ubicacion": ubicacion,
             })
 
     cantidad_raw = str(fila.iloc[4]).strip()
