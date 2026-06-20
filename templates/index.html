@@ -38,23 +38,33 @@ href="{{ url_for('static', filename='css/estilos.css') }}">
 
 <div class="banner">
 
-    <div class="banner-rojo">
-        <svg width="50" height="50" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="26" cy="26" r="24" stroke="white" stroke-width="2.5" fill="none"/>
-            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="white"/>
-            <polygon points="26,10 20,22 32,22" fill="white"/>
-            <polygon points="26,16 18,28 34,28" fill="white"/>
-            <polygon points="26,22 17,34 35,34" fill="white"/>
+    <div class="banner-marca">
+
+        <svg class="banner-arbol" width="30" height="30" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="26" r="24" stroke="#d34240" stroke-width="2.5" fill="none"/>
+            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="#d34240"/>
+            <polygon points="26,10 20,22 32,22" fill="#d34240"/>
+            <polygon points="26,16 18,28 34,28" fill="#d34240"/>
+            <polygon points="26,22 17,34 35,34" fill="#d34240"/>
         </svg>
-        <div>
-            <span class="banner-univ">Universidad</span>
-            <span class="banner-logo">ESAN</span>
+
+        <div class="banner-marca-texto">
+            <span class="banner-marca-nombre">esan<span class="banner-marca-barra">|</span>data</span>
+            <span class="banner-marca-sub">Tecnología de Información</span>
         </div>
+
     </div>
 
-    <span class="banner-subtitulo">Visualización de Software</span>
+    <div class="banner-flecha">
+        <span class="banner-subtitulo">Visualización de Software</span>
+    </div>
+
+    <button class="banner-menu" title="Más opciones" aria-label="Más opciones">
+        <i class="ti ti-dots" aria-hidden="true"></i>
+    </button>
 
 </div>
+
 
 <div class="contenedor">
 
