@@ -8,7 +8,7 @@
 
     margin:0 auto 20px auto;
 
-    background:#6366f1;
+    background:#d34240;
 
     border-radius:20px;
 
@@ -431,10 +431,7 @@ tbody tr:hover{
     padding:16px 18px;
 }
 
-.detalle-card:last-child{
-
-    grid-column:1 / -1;
-}
+/* 4 cards en grid 2x2 — sin last-child expandido */
 
 .detalle-label{
 
@@ -517,26 +514,51 @@ tbody tr:hover{
 
 .lab-link {
 
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:7px;
+
     font-family:'Poppins',sans-serif;
 
     font-weight:700;
 
+    font-size:22px;
+
     color:#0f766e;
+
+    background:#e6fefa;
+
+    border:1.5px solid #5eead4;
+
+    border-radius:10px;
+
+    padding:4px 14px 4px 10px;
 
     cursor:pointer;
 
-    text-decoration:underline;
-
-    text-decoration-color:#99f6e4;
-
-    text-underline-offset:3px;
-
-    transition:color 0.15s;
+    transition:background 0.18s, border-color 0.18s, color 0.18s, transform 0.12s;
 }
 
 .lab-link:hover {
 
+    background:#ccfbf1;
+
+    border-color:#14b8a6;
+
+    color:#0d4d45;
+
+    transform:translateY(-1px);
+}
+
+.lab-link i {
+
+    font-size:18px;
+
     color:#14b8a6;
+
+    flex-shrink:0;
 }
 
 /* AFORO BADGE */
