@@ -235,15 +235,15 @@ body{
 
     font-weight:700;
 
-    color:#4f46e5;
+    color:#1e3a8a;
 
     margin-bottom:16px;
 
     padding:10px 14px;
 
-    background:#eef2ff;
+    background:#eff6ff;
 
-    border-left:5px solid #6366f1;
+    border-left:5px solid #1e40af;
 
     border-radius:0 10px 10px 0;
 
@@ -261,11 +261,11 @@ body{
 
 .buscador-area{
 
-    background:#eef2ff;
+    background:#eff6ff;
 
     border-radius:16px;
 
-    border:2px solid #c7d2fe;
+    border:2px solid #bfdbfe;
 
     padding:14px 16px;
 
@@ -280,9 +280,9 @@ body{
 
 .buscador-area:focus-within{
 
-    border-color:#6366f1;
+    border-color:#1e40af;
 
-    box-shadow:0 0 0 3px #c7d2fe;
+    box-shadow:0 0 0 3px #bfdbfe;
 }
 
 .buscador-ilustracion{
@@ -324,7 +324,7 @@ body{
 
     font-weight:600;
 
-    color:#3730a3;
+    color:#1e3a8a;
 
     outline:none;
 
@@ -335,7 +335,7 @@ body{
 
 .buscador::placeholder{
 
-    color:#a5b4fc;
+    color:#93c5fd;
 
     font-weight:500;
 
@@ -368,9 +368,9 @@ thead th{
 
     top:0;
 
-    background:#c4b5fd;
+    background:#bfdbfe;
 
-    color:#312e81;
+    color:#1e3a8a;
 
     font-size:20px;
 
@@ -391,14 +391,14 @@ td{
 
 tbody tr:hover{
 
-    background:#ede9fe;
+    background:#dbeafe;
 
     cursor:pointer;
 }
 
 .seleccionado{
 
-    background:#ddd6fe !important;
+    background:#bfdbfe !important;
 }
 
 /* ========================== */
@@ -416,11 +416,11 @@ tbody tr:hover{
 
     flex-shrink:0;
 
-    color:#0f766e;
+    color:#9a3412;
 
-    background:#ccfbf1;
+    background:#fff7ed;
 
-    border-left-color:#14b8a6;
+    border-left-color:#ea580c;
 }
 
 #ambientes{
@@ -443,9 +443,9 @@ tbody tr:hover{
 
     top:0;
 
-    background:#99f6e4;
+    background:#fed7aa;
 
-    color:#134e4a;
+    color:#7c2d12;
 
     font-family:'Poppins',sans-serif;
 
@@ -478,7 +478,7 @@ tbody tr:hover{
 
     vertical-align:middle;
 
-    color:#0d4d45;
+    color:#7c2d12;
 
     letter-spacing:0.3px;
 }
@@ -500,11 +500,11 @@ tbody tr:hover{
 
     flex-shrink:0;
 
-    color:#92400e;
+    color:#134e4a;
 
-    background:#fef3c7;
+    background:#f0fdfa;
 
-    border-left-color:#f59e0b;
+    border-left-color:#0f766e;
 }
 
 #detalle{
@@ -538,9 +538,9 @@ tbody tr:hover{
 
     text-align:center;
 
-    background:#fef3c7;
+    background:#f0fdfa;
 
-    border-left:5px solid #f59e0b;
+    border-left:5px solid #0f766e;
 
     border-radius:0 12px 12px 0;
 
@@ -557,7 +557,7 @@ tbody tr:hover{
 
     font-weight:700;
 
-    color:#d97706;
+    color:#0f766e;
 
     text-transform:uppercase;
 
@@ -574,7 +574,7 @@ tbody tr:hover{
 
     font-weight:700;
 
-    color:#78350f;
+    color:#042f2e;
 
     line-height:1.2;
 }
@@ -583,7 +583,7 @@ tbody tr:hover{
 
     display:inline-block;
 
-    background:#f59e0b;
+    background:#0f766e;
 
     color:white;
 
@@ -642,11 +642,11 @@ tbody tr:hover{
 
     font-size:22px;
 
-    color:#0f766e;
+    color:#9a3412;
 
-    background:#e6fefa;
+    background:#fff7ed;
 
-    border:1.5px solid #5eead4;
+    border:1.5px solid #fed7aa;
 
     border-radius:10px;
 
@@ -663,7 +663,7 @@ tbody tr:hover{
 
     border-color:#14b8a6;
 
-    color:#0d4d45;
+    color:#7c2d12;
 
     transform:translateY(-1px);
 }
@@ -672,7 +672,7 @@ tbody tr:hover{
 
     font-size:18px;
 
-    color:#14b8a6;
+    color:#ea580c;
 
     flex-shrink:0;
 }
@@ -682,9 +682,9 @@ tbody tr:hover{
 .aforo-badge {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    color: #0f766e;
-    background: #ccfbf1;
-    border: 1.5px solid #5eead4;
+    color: #9a3412;
+    background: #fff7ed;
+    border: 1.5px solid #fed7aa;
     border-radius: 20px;
     padding: 5px 18px;
     font-size: 20px;
