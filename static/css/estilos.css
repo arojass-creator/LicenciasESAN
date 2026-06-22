@@ -8,7 +8,7 @@
 
     margin:0 auto 20px auto;
 
-    background:#10121a;
+    background:#1d6fa5;
 
     border-radius:16px;
 
@@ -18,7 +18,7 @@
 
     align-items:stretch;
 
-    padding:0 18px 0 0;
+    padding:0;
 
     box-sizing:border-box;
 
@@ -41,9 +41,36 @@
 
     gap:10px;
 
-    padding:0 24px 0 20px;
+    padding:0 50px 0 20px;
 
     flex-shrink:0;
+
+    position:relative;
+
+    z-index:2;
+}
+
+.banner-marca::after{
+
+    content:'';
+
+    position:absolute;
+
+    top:0;
+
+    left:100%;
+
+    width:28px;
+
+    height:100%;
+
+    background:#ffffff;
+
+    -webkit-clip-path: polygon(0 0, 0 100%, 100% 50%);
+
+    clip-path: polygon(0 0, 0 100%, 100% 50%);
+
+    z-index:2;
 }
 
 .banner-arbol{
@@ -107,11 +134,7 @@
 
     align-items:center;
 
-    padding-left:50px;
-
-    margin-left:-28px;
-
-    clip-path: polygon(28px 0, 100% 0, 100% 100%, 28px 100%, 0 50%);
+    padding-left:46px;
 
     position:relative;
 
