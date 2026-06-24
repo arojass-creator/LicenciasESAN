@@ -57,6 +57,14 @@ href="{{ url_for('static', filename='css/estilos.css') }}">
 
     <div class="banner-flecha">
         <span class="banner-subtitulo">Visualización de Software</span>
+
+        <div class="banner-usuario">
+            <i class="ti ti-user-circle" aria-hidden="true"></i>
+            <span class="banner-usuario-nombre">{{ session.nombre or session.usuario }}</span>
+            <a href="{{ url_for('logout') }}" class="banner-logout" title="Cerrar sesión">
+                <i class="ti ti-logout" aria-hidden="true"></i>
+            </a>
+        </div>
     </div>
 
 </div>
@@ -68,8 +76,9 @@ href="{{ url_for('static', filename='css/estilos.css') }}">
 
     <div class="panel lista">
 
-        <div class="titulo">
-            <i class="ti ti-layout-list" aria-hidden="true"></i> Lista de Software
+        <div class="titulo" id="titulo-panel-lista">
+            <i id="titulo-icono" class="ti ti-layout-list" aria-hidden="true"></i>
+            <span id="titulo-texto"> Lista de Software</span>
             <span id="badge-total" style="
                 float:right;
                 font-size:16px;
@@ -84,31 +93,29 @@ href="{{ url_for('static', filename='css/estilos.css') }}">
             ">{{ programas|length }} Programas Encontrados</span>
         </div>
 
+        <!-- TABS -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <button id="tab-programas" onclick="mostrarTabProgramas()" style="
+                flex:1;padding:8px 0;border-radius:20px;border:1.5px solid #1e40af;
+                background:#1e40af;color:#fff;font-family:'Poppins',sans-serif;
+                font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;
+            "><i class="ti ti-apps" style="margin-right:5px"></i>Programas</button>
+            <button id="tab-labs" onclick="mostrarTabLabs()" style="
+                flex:1;padding:8px 0;border-radius:20px;border:1.5px solid #e2e8f0;
+                background:#f8fafc;color:#64748b;font-family:'Poppins',sans-serif;
+                font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;
+            "><i class="ti ti-building" style="margin-right:5px"></i>Laboratorios</button>
+        </div>
+
+        <div id="vista-programas" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
         <div class="buscador-area">
-
-            <div class="buscador-ilustracion">
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="4" y="6" width="28" height="32" rx="4" fill="#c7d2fe"/>
-                    <rect x="7" y="10" width="18" height="3" rx="1.5" fill="#6366f1"/>
-                    <rect x="7" y="16" width="14" height="3" rx="1.5" fill="#a5b4fc"/>
-                    <rect x="7" y="22" width="16" height="3" rx="1.5" fill="#a5b4fc"/>
-                    <rect x="7" y="28" width="10" height="3" rx="1.5" fill="#a5b4fc"/>
-                    <circle cx="32" cy="34" r="7" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
-                    <circle cx="30" cy="32" r="3.5" stroke="#6366f1" stroke-width="2"/>
-                    <line x1="32.8" y1="34.8" x2="36" y2="38" stroke="#6366f1" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </div>
-
-            <div class="buscador-derecha">
-                <i class="ti ti-search buscador-icono" aria-hidden="true"></i>
-                <input
-                    type="text"
-                    id="buscador"
-                    class="buscador"
-                    placeholder="Buscar programa..."
-                    onkeyup="filtrarProgramas()">
-            </div>
-
+            <i class="ti ti-search buscador-icono" aria-hidden="true"></i>
+            <input
+                type="text"
+                id="buscador"
+                class="buscador"
+                placeholder="Buscar programa..."
+                onkeyup="filtrarProgramas()">
         </div>
 
         <div class="tabla-contenedor">
@@ -142,8 +149,37 @@ href="{{ url_for('static', filename='css/estilos.css') }}">
             </table>
 
         </div>
+        </div><!-- fin vista-programas -->
 
-    </div>
+        <!-- VISTA LABORATORIOS -->
+        <div id="vista-labs" style="display:none;flex:1;overflow:hidden;display:none;flex-direction:column;gap:10px;">
+            <div style="
+                background:#fff7ed;border-radius:16px;border:2px solid #fed7aa;
+                padding:10px 16px;display:flex;align-items:center;gap:10px;
+                transition:border-color .2s;
+            " onfocusin="this.style.borderColor='#ea580c';this.style.boxShadow='0 0 0 3px #fed7aa'"
+               onfocusout="this.style.borderColor='#fed7aa';this.style.boxShadow='none'">
+                <i class="ti ti-search" style="color:#ea580c;font-size:18px;flex-shrink:0;" aria-hidden="true"></i>
+                <input id="buscador-labs" type="text" placeholder="Buscar laboratorio..."
+                    onkeyup="filtrarLabs()"
+                    style="flex:1;border:none;background:transparent;font-family:'Poppins',sans-serif;
+                           font-size:15px;font-weight:600;color:#9a3412;outline:none;">
+            </div>
+            <div style="flex:1;overflow-y:auto;border:1px solid #e2e8f0;border-radius:12px;">
+            <table id="tablaLabs" style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th style="position:sticky;top:0;background:#fed7aa;color:#7c2d12;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:10px;text-align:left;z-index:100;">Laboratorio</th>
+                        <th style="position:sticky;top:0;background:#fed7aa;color:#7c2d12;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:10px;text-align:center;z-index:100;">Tipo</th>
+                        <th style="position:sticky;top:0;background:#fed7aa;color:#7c2d12;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:10px;text-align:center;z-index:100;">Aforo</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-labs"></tbody>
+            </table>
+            </div>
+        </div><!-- fin vista-labs -->
+
+    </div><!-- fin panel lista -->
 
     <!-- PANEL AMBIENTES -->
 
@@ -312,7 +348,125 @@ function filtrarProgramas(){
     });
 
     const visibles = [...filas].filter(f => f.style.display !== "none").length;
+    if (document.getElementById("vista-programas").style.display !== "none") {
+        document.getElementById("badge-total").style.background = "#1e40af";
+        document.getElementById("badge-total").textContent = visibles + " Programas Encontrados";
+    }
+}
+
+// =====================
+// TABS: Programas / Labs
+// =====================
+
+function mostrarTabProgramas() {
+    document.getElementById("vista-programas").style.display = "flex";
+    document.getElementById("vista-labs").style.display = "none";
+
+    const tabP = document.getElementById("tab-programas");
+    const tabL = document.getElementById("tab-labs");
+
+    tabP.style.background = "#1e40af";
+    tabP.style.color = "#fff";
+    tabP.style.borderColor = "#1e40af";
+
+    tabL.style.background = "#f8fafc";
+    tabL.style.color = "#64748b";
+    tabL.style.borderColor = "#e2e8f0";
+
+    // Actualizar título
+    document.getElementById("titulo-icono").className = "ti ti-layout-list";
+    document.getElementById("titulo-texto").textContent = " Lista de Software";
+    document.getElementById("titulo-panel-lista").style.color = "#1e3a8a";
+    document.getElementById("titulo-panel-lista").style.background = "#eff6ff";
+    document.getElementById("titulo-panel-lista").style.borderLeftColor = "#1e40af";
+    document.getElementById("badge-total").style.display = "";
+    document.getElementById("badge-total").style.background = "#1e40af";
+    // Contar filas visibles actuales
+    const filas = document.querySelectorAll("#tablaProgramas tbody tr");
+    const visibles = [...filas].filter(f => f.style.display !== "none").length;
     document.getElementById("badge-total").textContent = visibles + " Programas Encontrados";
+}
+
+async function mostrarTabLabs() {
+    document.getElementById("vista-programas").style.display = "none";
+    document.getElementById("vista-labs").style.display = "flex";
+
+    const tabP = document.getElementById("tab-programas");
+    const tabL = document.getElementById("tab-labs");
+
+    tabL.style.background = "#ea580c";
+    tabL.style.color = "#fff";
+    tabL.style.borderColor = "#ea580c";
+
+    tabP.style.background = "#f8fafc";
+    tabP.style.color = "#64748b";
+    tabP.style.borderColor = "#e2e8f0";
+
+    // Actualizar título
+    document.getElementById("titulo-icono").className = "ti ti-building";
+    document.getElementById("titulo-texto").textContent = " Lista de Laboratorios";
+    document.getElementById("titulo-panel-lista").style.color = "#9a3412";
+    document.getElementById("titulo-panel-lista").style.background = "#fff7ed";
+    document.getElementById("titulo-panel-lista").style.borderLeftColor = "#ea580c";
+    document.getElementById("badge-total").style.display = "";
+    document.getElementById("badge-total").style.background = "#ea580c";
+
+    // Cargar labs si no se han cargado aún
+    const cuerpo = document.getElementById("cuerpo-labs");
+    if (cuerpo.dataset.cargado === "1") {
+        document.getElementById("badge-total").textContent = (window._todosLabs || []).length + " Laboratorios Encontrados";
+        return;
+    }
+
+    document.getElementById("badge-total").textContent = "Cargando...";
+    cuerpo.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:#94a3b8;font-style:italic;">Cargando laboratorios...</td></tr>`;
+
+    try {
+        const resp = await fetch("/laboratorios");
+        if (!resp.ok) throw new Error("Error " + resp.status);
+        const labs = await resp.json();
+        window._todosLabs = labs;
+        cuerpo.dataset.cargado = "1";
+        renderLabs(labs);
+        document.getElementById("badge-total").textContent = labs.length + " Laboratorios Encontrados";
+    } catch(e) {
+        cuerpo.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:#ef4444;font-style:italic;">Error al cargar laboratorios. Recarga la página.</td></tr>`;
+        document.getElementById("badge-total").textContent = "Error";
+    }
+}
+
+function renderLabs(labs) {
+    const cuerpo = document.getElementById("cuerpo-labs");
+    cuerpo.innerHTML = labs.map(lab => `
+        <tr onclick="abrirModalLab('${lab.nombre}')" style="cursor:pointer;" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''">
+            <td style="padding:10px 12px;font-size:18px;font-weight:700;color:#9a3412;">
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                    <i class="ti ti-eye" style="color:#ea580c;font-size:16px;"></i>
+                    ${lab.nombre}
+                </span>
+            </td>
+            <td style="padding:10px;text-align:center;font-size:15px;font-weight:600;color:#7c2d12;">
+                <span style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:20px;padding:3px 12px;">
+                    <i class="ti ti-microscope" style="font-size:13px;margin-right:4px;vertical-align:-1px;"></i>${lab.tipo}
+                </span>
+            </td>
+            <td style="padding:10px;text-align:center;font-size:15px;font-weight:600;color:#7c2d12;">
+                <span style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:20px;padding:3px 12px;">
+                    <i class="ti ti-users" style="font-size:13px;margin-right:4px;vertical-align:-1px;"></i>${lab.aforo}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function filtrarLabs() {
+    const texto = document.getElementById("buscador-labs").value.toLowerCase();
+    const filtrados = (window._todosLabs || []).filter(l =>
+        l.nombre.toLowerCase().includes(texto) ||
+        l.tipo.toLowerCase().includes(texto)
+    );
+    renderLabs(filtrados);
+    document.getElementById("badge-total").textContent = filtrados.length + " Laboratorios Encontrados";
 }
 
 async function abrirModalLab(nombreLab) {
