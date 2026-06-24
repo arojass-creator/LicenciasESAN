@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Iniciar sesión — ESAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0d1b2a;
+        font-family: 'Inter', sans-serif;
+    }
+    .login-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 40px 36px;
+        width: 360px;
+        box-shadow: 0 20px 50px rgba(0,0,0,.3);
+    }
+    .login-logo {
+        font-family: 'Poppins', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1c3a52;
+        margin-bottom: 4px;
+        text-align: center;
+    }
+    .login-logo span { color: #d34240; }
+    .login-sub {
+        text-align: center;
+        font-size: 12px;
+        color: #8a94a8;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+    }
+    label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 6px;
+        margin-top: 16px;
+    }
+    input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color .15s;
+    }
+    input:focus { border-color: #1d6fa5; }
+    button {
+        width: 100%;
+        margin-top: 26px;
+        padding: 12px;
+        background: #1d6fa5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        transition: background .15s;
+    }
+    button:hover { background: #16567f; }
+    .error-msg {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="login-logo">esan<span>|</span>data</div>
+    <div class="login-sub">Control de Licencias de Software</div>
+
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <label for="usuario">Usuario de red</label>
+        <input type="text" id="usuario" name="usuario" placeholder="ej. arojass" autocomplete="username" required autofocus>
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+
+        <button type="submit">Iniciar sesión</button>
+    </form>
+</div>
+
+</body>
+</html>
