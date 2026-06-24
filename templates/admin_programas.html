@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Administración de Programas — ESAN</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+<style>
+    .admin-wrap{
+        width:95vw;
+        margin:0 auto 30px auto;
+    }
+    .admin-panel{
+        background:#fff;
+        border-radius:20px;
+        border:1px solid #e2e8f0;
+        box-shadow:0 8px 20px rgba(0,0,0,.08);
+        padding:24px;
+    }
+    .admin-header{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:20px;
+    }
+    .admin-titulo{
+        font-family:'Poppins',sans-serif;
+        font-size:22px;
+        font-weight:700;
+        color:#1e3a8a;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+    .btn-nuevo{
+        background:#1d6fa5;
+        color:#fff;
+        border:none;
+        padding:11px 22px;
+        border-radius:10px;
+        font-family:'Inter',sans-serif;
+        font-size:14px;
+        font-weight:600;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        transition:background .15s;
+    }
+    .btn-nuevo:hover{ background:#16567f; }
+
+    .admin-nav{
+        display:flex;
+        gap:10px;
+        margin-bottom:20px;
+    }
+    .admin-nav a{
+        padding:9px 18px;
+        border-radius:10px;
+        font-family:'Inter',sans-serif;
+        font-size:13px;
+        font-weight:600;
+        text-decoration:none;
+        color:#5a6282;
+        background:#f0f2f7;
+        transition:background .15s,color .15s;
+    }
+    .admin-nav a.activo{
+        background:#1d6fa5;
+        color:#fff;
+    }
+
+    table.tabla-admin{
+        width:100%;
+        border-collapse:collapse;
+    }
+    table.tabla-admin thead th{
+        background:#eff6ff;
+        color:#1e3a8a;
+        font-family:'Inter',sans-serif;
+        font-size:12px;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.5px;
+        padding:12px 14px;
+        text-align:left;
+        position:sticky;
+        top:0;
+    }
+    table.tabla-admin td{
+        padding:12px 14px;
+        border-bottom:1px solid #e2e8f0;
+        font-family:'Inter',sans-serif;
+        font-size:14px;
+        color:#1e2333;
+    }
+    table.tabla-admin tbody tr:hover{
+        background:#f8fafc;
+    }
+    .admin-tabla-contenedor{
+        max-height:60vh;
+        overflow-y:auto;
+        border:1px solid #e2e8f0;
+        border-radius:12px;
+    }
+    .acciones-fila{
+        display:flex;
+        gap:8px;
+    }
+    .btn-icono{
+        width:34px;
+        height:34px;
+        border-radius:8px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border:none;
+        cursor:pointer;
+        font-size:16px;
+        text-decoration:none;
+        transition:background .15s;
+    }
+    .btn-editar{ background:#eff6ff; color:#1e40af; }
+    .btn-editar:hover{ background:#bfdbfe; }
+    .btn-eliminar{ background:#fef2f2; color:#b91c1c; }
+    .btn-eliminar:hover{ background:#fecaca; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+    <div class="banner-marca">
+        <svg class="banner-arbol" width="30" height="30" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="26" r="24" stroke="#d34240" stroke-width="2.5" fill="none"/>
+            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="#d34240"/>
+            <polygon points="26,10 20,22 32,22" fill="#d34240"/>
+            <polygon points="26,16 18,28 34,28" fill="#d34240"/>
+            <polygon points="26,22 17,34 35,34" fill="#d34240"/>
+        </svg>
+        <div class="banner-marca-texto">
+            <span class="banner-marca-nombre">esan<span class="banner-marca-barra">|</span>data</span>
+            <span class="banner-marca-sub">Tecnología de Información</span>
+        </div>
+    </div>
+
+    <div class="banner-flecha">
+        <span class="banner-subtitulo">Panel de Administración</span>
+
+        <div class="banner-usuario">
+            <i class="ti ti-user-circle" aria-hidden="true"></i>
+            <span class="banner-usuario-nombre">{{ session.nombre or session.usuario }}</span>
+            <a href="{{ url_for('logout') }}" class="banner-logout" title="Cerrar sesión">
+                <i class="ti ti-logout" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="admin-wrap">
+    <div class="admin-panel">
+
+        <div class="admin-nav">
+            <a href="{{ url_for('admin_programas') }}" class="activo"><i class="ti ti-apps"></i> Programas</a>
+            <a href="#"><i class="ti ti-building"></i> Laboratorios</a>
+            <a href="#"><i class="ti ti-users"></i> Usuarios</a>
+            <a href="{{ url_for('inicio') }}"><i class="ti ti-eye"></i> Ver como visor</a>
+        </div>
+
+        <div class="admin-header">
+            <div class="admin-titulo">
+                <i class="ti ti-apps"></i> Mantenimiento de Programas
+            </div>
+            <a href="{{ url_for('admin_programa_nuevo') }}" class="btn-nuevo">
+                <i class="ti ti-plus"></i> Nuevo Programa
+            </a>
+        </div>
+
+        <div class="admin-tabla-contenedor">
+            <table class="tabla-admin">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th>Nombre</th>
+                        <th>Versión</th>
+                        <th>Licencia</th>
+                        <th>Cantidad</th>
+                        <th style="width:110px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in programas %}
+                    <tr>
+                        <td>{{ p.item }}</td>
+                        <td>{{ p.nombre }}</td>
+                        <td>{{ p.version }}</td>
+                        <td>{{ p.licencia }}</td>
+                        <td>{{ p.cantidad }}</td>
+                        <td>
+                            <div class="acciones-fila">
+                                <a href="{{ url_for('admin_programa_editar', id_programa=p.id) }}"
+                                   class="btn-icono btn-editar" title="Editar">
+                                    <i class="ti ti-edit"></i>
+                                </a>
+                                <form method="POST"
+                                      action="{{ url_for('admin_programa_eliminar', id_programa=p.id) }}"
+                                      onsubmit="return confirm('¿Eliminar el programa &quot;{{ p.nombre }}&quot;? Esta acción no se puede deshacer.');"
+                                      style="display:inline;">
+                                    <button type="submit" class="btn-icono btn-eliminar" title="Eliminar">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
