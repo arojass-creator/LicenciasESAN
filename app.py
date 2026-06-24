@@ -129,7 +129,7 @@ def programa(id_programa):
 
     df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="BD")
 
-    df_aforo = pd.read_excel(ARCHIVO_EXCEL, sheet_name="AFORO")
+    df_aforo = _leer_aforo()
     aforo_dict = {}
     tiene_tipo = "TIPO LABORATORIO" in df_aforo.columns
     for _, fila_aforo in df_aforo.iterrows():
@@ -143,6 +143,7 @@ def programa(id_programa):
             "edificio":  edificio,
             "tipo":      tipo,
             "ubicacion": ubicacion,
+            "estado":    fila_aforo.get("ESTADO", "ACTIVO"),
         }
 
     fila = df.iloc[id_programa]
@@ -154,6 +155,10 @@ def programa(id_programa):
         valor = str(fila[columna]).strip().lower()
 
         if valor in ["si", "sí", "x", "1", "true", "ok", "instalado"]:
+
+            # Si el laboratorio existe en AFORO y está INACTIVO, no se muestra
+            if columna in aforo_dict and aforo_dict[columna]["estado"] != "ACTIVO":
+                continue
 
             if columna == "PODIOS":
                 capacidad = "Variado"
@@ -231,16 +236,21 @@ def laboratorio(nombre_lab):
 @app.route("/laboratorios")
 @login_requerido
 def laboratorios():
-    """Devuelve la lista completa de laboratorios/ambientes con su
-    tipo y aforo, para la pestaña 'Laboratorios' del panel izquierdo."""
+    """Devuelve la lista de laboratorios/ambientes ACTIVOS con su
+    tipo y aforo, para la pestaña 'Laboratorios' del panel izquierdo.
+    Los laboratorios marcados como INACTIVO no se muestran aquí."""
 
-    df_aforo = pd.read_excel(ARCHIVO_EXCEL, sheet_name="AFORO")
+    df_aforo = _leer_aforo()
 
     tiene_tipo = "TIPO LABORATORIO" in df_aforo.columns
 
     labs = []
 
     for _, fila_aforo in df_aforo.iterrows():
+
+        estado = str(fila_aforo.get("ESTADO", "ACTIVO")).strip().upper()
+        if estado != "ACTIVO":
+            continue
 
         nombre = str(fila_aforo["LABORATORIO"]).strip()
 
@@ -272,6 +282,28 @@ def _nombres_laboratorios():
     """Lista de nombres de laboratorio (columnas de la hoja BD desde la 6ta)."""
     df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="BD")
     return [str(c) for c in df.columns[5:]]
+
+
+def _leer_aforo():
+    """Lee la hoja AFORO normalizando encabezados y garantizando que
+    exista la columna ESTADO (si no existe, se asume ACTIVO para todos
+    los laboratorios ya cargados, sin romper datos previos)."""
+    df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="AFORO")
+    df.columns = [c.strip().upper() for c in df.columns]
+
+    if "ESTADO" not in df.columns:
+        df["ESTADO"] = "ACTIVO"
+
+    df["ESTADO"] = df["ESTADO"].fillna("ACTIVO").astype(str).str.strip().str.upper()
+    df["ESTADO"] = df["ESTADO"].replace("", "ACTIVO")
+
+    return df
+
+
+def _guardar_aforo(df):
+    with pd.ExcelWriter(ARCHIVO_EXCEL, engine="openpyxl", mode="a",
+                        if_sheet_exists="replace") as writer:
+        df.to_excel(writer, sheet_name="AFORO", index=False)
 
 
 @app.route("/admin/programas")
@@ -552,6 +584,139 @@ def admin_usuario_toggle(id_usuario):
                         if_sheet_exists="replace") as writer:
         df.to_excel(writer, sheet_name="USUARIOS", index=False)
     return redirect(url_for("admin_usuarios"))
+
+
+# ===========================================================================
+# ADMINISTRACIÓN — MANTENIMIENTO DE LABORATORIOS (solo rol admin)
+# ===========================================================================
+
+def _agregar_columna_bd_si_no_existe(nombre_lab):
+    """Si el laboratorio es nuevo, crea su columna correspondiente en
+    la hoja BD para que pueda asignarse a programas."""
+    df_bd = pd.read_excel(ARCHIVO_EXCEL, sheet_name="BD")
+    if nombre_lab not in df_bd.columns:
+        df_bd[nombre_lab] = ""
+        with pd.ExcelWriter(ARCHIVO_EXCEL, engine="openpyxl", mode="a",
+                            if_sheet_exists="replace") as writer:
+            df_bd.to_excel(writer, sheet_name="BD", index=False)
+
+
+def _renombrar_columna_bd(nombre_anterior, nombre_nuevo):
+    """Si se renombra un laboratorio, renombra también su columna en BD
+    para no perder la relación con los programas ya asignados."""
+    if nombre_anterior == nombre_nuevo:
+        return
+    df_bd = pd.read_excel(ARCHIVO_EXCEL, sheet_name="BD")
+    if nombre_anterior in df_bd.columns:
+        df_bd = df_bd.rename(columns={nombre_anterior: nombre_nuevo})
+        with pd.ExcelWriter(ARCHIVO_EXCEL, engine="openpyxl", mode="a",
+                            if_sheet_exists="replace") as writer:
+            df_bd.to_excel(writer, sheet_name="BD", index=False)
+
+
+@app.route("/admin/laboratorios")
+@admin_requerido
+def admin_laboratorios():
+
+    df = _leer_aforo()
+
+    labs = []
+    for i, fila in df.iterrows():
+        labs.append({
+            "id":        i,
+            "nombre":    str(fila.get("LABORATORIO", "")).strip(),
+            "capacidad": fila.get("CAPACIDAD", "—"),
+            "piso":      str(fila.get("PISO", "—")).strip(),
+            "edificio":  str(fila.get("EDIFICIO", "—")).strip(),
+            "tipo":      str(fila.get("TIPO LABORATORIO", "—")).strip(),
+            "estado":    fila.get("ESTADO", "ACTIVO"),
+        })
+
+    return render_template("admin_laboratorios.html", laboratorios=labs)
+
+
+@app.route("/admin/laboratorio/nuevo", methods=["GET", "POST"])
+@admin_requerido
+def admin_laboratorio_nuevo():
+
+    if request.method == "POST":
+
+        df = _leer_aforo()
+
+        nombre = request.form.get("nombre", "").strip()
+
+        nueva = {
+            "LABORATORIO":      nombre,
+            "CAPACIDAD":        request.form.get("capacidad", "0").strip(),
+            "PISO":             request.form.get("piso", "").strip(),
+            "EDIFICIO":         request.form.get("edificio", "").strip(),
+            "TIPO LABORATORIO": request.form.get("tipo", "").strip(),
+            "ESTADO":           "ACTIVO",
+        }
+
+        df = pd.concat([df, pd.DataFrame([nueva])], ignore_index=True)
+        _guardar_aforo(df)
+
+        # Crear la columna correspondiente en BD para poder asignar programas
+        _agregar_columna_bd_si_no_existe(nombre)
+
+        return redirect(url_for("admin_laboratorios"))
+
+    return render_template("admin_laboratorio_form.html", laboratorio=None)
+
+
+@app.route("/admin/laboratorio/<int:id_lab>/editar", methods=["GET", "POST"])
+@admin_requerido
+def admin_laboratorio_editar(id_lab):
+
+    df = _leer_aforo()
+
+    if id_lab < 0 or id_lab >= len(df):
+        return redirect(url_for("admin_laboratorios"))
+
+    if request.method == "POST":
+
+        nombre_anterior = str(df.at[id_lab, "LABORATORIO"]).strip()
+        nombre_nuevo    = request.form.get("nombre", "").strip()
+
+        df.at[id_lab, "LABORATORIO"]      = nombre_nuevo
+        df.at[id_lab, "CAPACIDAD"]        = request.form.get("capacidad", "0").strip()
+        df.at[id_lab, "PISO"]             = request.form.get("piso", "").strip()
+        df.at[id_lab, "EDIFICIO"]         = request.form.get("edificio", "").strip()
+        df.at[id_lab, "TIPO LABORATORIO"] = request.form.get("tipo", "").strip()
+        # El ESTADO no se toca aquí: se cambia solo con el botón de activar/desactivar
+
+        _guardar_aforo(df)
+        _renombrar_columna_bd(nombre_anterior, nombre_nuevo)
+
+        return redirect(url_for("admin_laboratorios"))
+
+    fila = df.iloc[id_lab]
+    laboratorio_actual = {
+        "id":        id_lab,
+        "nombre":    str(fila.get("LABORATORIO", "")).strip(),
+        "capacidad": fila.get("CAPACIDAD", ""),
+        "piso":      str(fila.get("PISO", "")).strip(),
+        "edificio":  str(fila.get("EDIFICIO", "")).strip(),
+        "tipo":      str(fila.get("TIPO LABORATORIO", "")).strip(),
+        "estado":    fila.get("ESTADO", "ACTIVO"),
+    }
+
+    return render_template("admin_laboratorio_form.html", laboratorio=laboratorio_actual)
+
+
+@app.route("/admin/laboratorio/<int:id_lab>/toggle", methods=["POST"])
+@admin_requerido
+def admin_laboratorio_toggle(id_lab):
+
+    df = _leer_aforo()
+
+    if 0 <= id_lab < len(df):
+        actual = str(df.at[id_lab, "ESTADO"]).strip().upper()
+        df.at[id_lab, "ESTADO"] = "INACTIVO" if actual == "ACTIVO" else "ACTIVO"
+        _guardar_aforo(df)
+
+    return redirect(url_for("admin_laboratorios"))
 
 
 if __name__ == "__main__":
