@@ -190,9 +190,22 @@
 
                 <div>
                     <label for="licencia">Tipo de licencia</label>
-                    <input type="text" id="licencia" name="licencia"
-                           value="{{ programa.licencia if programa else '' }}"
-                           placeholder="Licenciado / Gratuito / etc.">
+                    <select id="licencia" name="licencia" style="
+                        width:100%;
+                        padding:11px 14px;
+                        border:1.5px solid #e2e8f0;
+                        border-radius:10px;
+                        font-family:'Inter',sans-serif;
+                        font-size:14px;
+                        outline:none;
+                        background:#fff;
+                        color:#1e293b;
+                        cursor:pointer;
+                        transition:border-color .15s;
+                    " onfocus="this.style.borderColor='#1d6fa5'" onblur="this.style.borderColor='#e2e8f0'">
+                        <option value="Licenciado" {% if programa and programa.licencia == 'Licenciado' %}selected{% endif %}>Licenciado</option>
+                        <option value="Libre" {% if programa and programa.licencia == 'Libre' %}selected{% endif %}>Libre</option>
+                    </select>
                 </div>
 
                 <div>
