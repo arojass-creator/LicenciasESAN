@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>{{ 'Editar' if usuario else 'Nuevo' }} Usuario — ESAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+<style>
+    .form-wrap{ width:95vw; max-width:600px; margin:0 auto 30px auto; }
+    .form-panel{ background:#fff; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 8px 20px rgba(0,0,0,.08); padding:28px 32px; }
+    .form-titulo{ font-family:'Poppins',sans-serif; font-size:22px; font-weight:700; color:#1e3a8a; display:flex; align-items:center; gap:10px; margin-bottom:24px; }
+    .form-group{ margin-bottom:18px; }
+    label{ display:block; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:#5a6282; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+    input[type=text]{ width:100%; padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; outline:none; transition:border-color .15s; }
+    input:focus{ border-color:#1d6fa5; }
+    select{ width:100%; padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; outline:none; background:#fff; color:#1e293b; cursor:pointer; transition:border-color .15s; }
+    select:focus{ border-color:#1d6fa5; }
+    .form-acciones{ display:flex; gap:12px; margin-top:28px; }
+    .btn-guardar{ background:#1d6fa5; color:#fff; border:none; padding:12px 28px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:background .15s; }
+    .btn-guardar:hover{ background:#16567f; }
+    .btn-cancelar{ background:#f0f2f7; color:#5a6282; border:none; padding:12px 28px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:background .15s; }
+    .btn-cancelar:hover{ background:#e2e6ef; }
+    .hint{ font-size:11px; color:#94a3b8; margin-top:4px; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+    <div class="banner-marca">
+        <svg class="banner-arbol" width="30" height="30" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="24" stroke="#d34240" stroke-width="2.5" fill="none"/>
+            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="#d34240"/>
+            <polygon points="26,10 20,22 32,22" fill="#d34240"/>
+            <polygon points="26,16 18,28 34,28" fill="#d34240"/>
+            <polygon points="26,22 17,34 35,34" fill="#d34240"/>
+        </svg>
+        <div class="banner-marca-texto">
+            <span class="banner-marca-nombre">esan<span class="banner-marca-barra">|</span>data</span>
+            <span class="banner-marca-sub">Tecnología de Información</span>
+        </div>
+    </div>
+    <div class="banner-flecha">
+        <span class="banner-subtitulo">Panel de Administración</span>
+        <div class="banner-usuario">
+            <i class="ti ti-user-circle" aria-hidden="true"></i>
+            <span class="banner-usuario-nombre">{{ session.nombre or session.usuario }}</span>
+            <a href="{{ url_for('logout') }}" class="banner-logout" title="Cerrar sesión">
+                <i class="ti ti-logout" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="form-wrap">
+    <div class="form-panel">
+
+        <div class="form-titulo">
+            <i class="ti ti-user-plus"></i>
+            {{ 'Editar Usuario' if usuario else 'Nuevo Usuario' }}
+        </div>
+
+        <form method="POST">
+
+            <div class="form-group">
+                <label for="usuario">Usuario de red / Nombre / Correo</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="text" id="usuario" name="usuario" required
+                           placeholder="ej. arojass o Alejandro Rojas"
+                           value="{{ usuario.usuario if usuario else '' }}"
+                           style="flex:1">
+                    <button type="button" onclick="buscarEnAD()" style="
+                        background:#1d6fa5;color:#fff;border:none;
+                        padding:11px 16px;border-radius:10px;
+                        font-family:'Inter',sans-serif;font-size:13px;
+                        font-weight:600;cursor:pointer;white-space:nowrap;
+                        display:inline-flex;align-items:center;gap:6px;
+                    "><i class="ti ti-search"></i> Buscar</button>
+                </div>
+                <p class="hint">Puedes buscar por usuario, nombre completo o correo institucional</p>
+
+                <!-- Contraseña del admin para el bind en AD -->
+                <div id="pwd-area" style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+                    <input type="password" id="pwd-admin" placeholder="Tu contraseña de red (para buscar en AD)"
+                           style="flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+                                  font-family:'Inter',sans-serif;font-size:13px;outline:none;">
+                </div>
+                <p class="hint" style="color:#f59e0b;">
+                    <i class="ti ti-lock" style="vertical-align:-2px;"></i>
+                    Tu contraseña se usa solo para consultar el AD y no se guarda
+                </p>
+
+                <!-- Resultados de búsqueda -->
+                <div id="ad-resultados" style="display:none;margin-top:8px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;"></div>
+                <div id="ad-estado" style="margin-top:6px;font-size:12px;color:#94a3b8;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre completo</label>
+                <input type="text" id="nombre" name="nombre" required
+                       placeholder="ej. Alejandro Rojas"
+                       value="{{ usuario.nombre if usuario else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol</label>
+                <select id="rol" name="rol">
+                    <option value="viewer" {% if not usuario or usuario.rol == 'viewer' %}selected{% endif %}>
+                        Viewer — Solo lectura
+                    </option>
+                    <option value="admin" {% if usuario and usuario.rol == 'admin' %}selected{% endif %}>
+                        Admin — Acceso completo
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="activo">Estado</label>
+                <select id="activo" name="activo">
+                    <option value="SI" {% if not usuario or usuario.activo == 'SI' %}selected{% endif %}>
+                        ✅ Activo — Puede iniciar sesión
+                    </option>
+                    <option value="NO" {% if usuario and usuario.activo == 'NO' %}selected{% endif %}>
+                        ❌ Inactivo — Sin acceso
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-acciones">
+                <button type="submit" class="btn-guardar">
+                    <i class="ti ti-check"></i> Guardar
+                </button>
+                <a href="{{ url_for('admin_usuarios') }}" class="btn-cancelar">
+                    <i class="ti ti-x"></i> Cancelar
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+</body>
+<style>
+.resultado-item{
+    padding:10px 14px;
+    border-bottom:1px solid #f1f5f9;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    transition:background .12s;
+}
+.resultado-item:last-child{ border-bottom:none; }
+.resultado-item:hover{ background:#eff6ff; }
+.resultado-usuario{ font-size:13px; font-weight:700; color:#1d6fa5; }
+.resultado-nombre{ font-size:12px; color:#334155; }
+.resultado-correo{ font-size:11px; color:#94a3b8; }
+.resultado-estimado{ font-size:11px; color:#f59e0b; font-style:italic; }
+</style>
+<script>
+async function buscarEnAD() {
+    const termino = document.getElementById("usuario").value.trim();
+    const pwd     = document.getElementById("pwd-admin").value.trim();
+    const estado  = document.getElementById("ad-estado");
+    const lista   = document.getElementById("ad-resultados");
+
+    if (!termino) { estado.textContent = "Escribe un usuario, nombre o correo para buscar."; return; }
+
+    estado.textContent = "🔍 Buscando en el Active Directory...";
+    lista.style.display = "none";
+    lista.innerHTML = "";
+
+    try {
+        const url = `/admin/buscar-usuario?usuario=${encodeURIComponent(termino)}&pwd=${encodeURIComponent(pwd)}`;
+        const resp = await fetch(url);
+        const datos = await resp.json();
+
+        if (!datos.ok) {
+            estado.textContent = "❌ Error: " + (datos.error || "No se pudo conectar al AD");
+            return;
+        }
+
+        const results = datos.resultados || [];
+
+        if (results.length === 0) {
+            estado.textContent = "Sin resultados para \"" + termino + "\"";
+            return;
+        }
+
+        estado.textContent = results.length + " resultado(s) encontrado(s). Haz clic para seleccionar:";
+        lista.style.display = "block";
+
+        lista.innerHTML = results.map(r => `
+            <div class="resultado-item" onclick="seleccionarUsuario('${r.usuario}', '${r.nombre.replace(/'/g,"\\'")}', '${r.correo}')">
+                <span class="resultado-usuario"><i class="ti ti-user"></i> ${r.usuario}</span>
+                <span class="resultado-nombre">${r.nombre || "(sin nombre)"}</span>
+                <span class="${r.estimado ? 'resultado-estimado' : 'resultado-correo'}">
+                    <i class="ti ti-mail"></i> ${r.correo} ${r.estimado ? '(estimado)' : ''}
+                </span>
+            </div>
+        `).join('');
+
+    } catch(e) {
+        estado.textContent = "❌ Error de conexión al servidor";
+    }
+}
+
+function seleccionarUsuario(usuario, nombre, correo) {
+    document.getElementById("usuario").value = usuario;
+    document.getElementById("nombre").value  = nombre;
+    document.getElementById("ad-resultados").style.display = "none";
+    document.getElementById("ad-estado").innerHTML =
+        `✅ Seleccionado: <strong>${nombre}</strong> &nbsp;·&nbsp; <span style="color:#1d6fa5">${correo}</span>`;
+}
+
+// Buscar también al presionar Enter en el campo
+document.getElementById("usuario").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") { e.preventDefault(); buscarEnAD(); }
+});
+</script>
+</html>
