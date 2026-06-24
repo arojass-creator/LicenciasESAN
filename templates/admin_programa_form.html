@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>{{ 'Editar' if programa else 'Nuevo' }} Programa — ESAN</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+
+<style>
+    .form-wrap{
+        width:95vw;
+        max-width:900px;
+        margin:0 auto 30px auto;
+    }
+    .form-panel{
+        background:#fff;
+        border-radius:20px;
+        border:1px solid #e2e8f0;
+        box-shadow:0 8px 20px rgba(0,0,0,.08);
+        padding:28px 32px;
+    }
+    .form-titulo{
+        font-family:'Poppins',sans-serif;
+        font-size:22px;
+        font-weight:700;
+        color:#1e3a8a;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:24px;
+    }
+    .form-grid{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:18px;
+    }
+    .form-grid .full{ grid-column:1 / -1; }
+
+    label{
+        display:block;
+        font-family:'Inter',sans-serif;
+        font-size:12px;
+        font-weight:600;
+        color:#5a6282;
+        text-transform:uppercase;
+        letter-spacing:.4px;
+        margin-bottom:6px;
+    }
+    input[type=text], input[type=number]{
+        width:100%;
+        padding:11px 14px;
+        border:1.5px solid #e2e8f0;
+        border-radius:10px;
+        font-family:'Inter',sans-serif;
+        font-size:14px;
+        outline:none;
+        transition:border-color .15s;
+    }
+    input:focus{ border-color:#1d6fa5; }
+
+    .labs-titulo{
+        font-family:'Poppins',sans-serif;
+        font-size:15px;
+        font-weight:700;
+        color:#9a3412;
+        margin:28px 0 14px 0;
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+    .labs-grid{
+        display:grid;
+        grid-template-columns:repeat(4, 1fr);
+        gap:10px;
+    }
+    .lab-checkbox{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        background:#fff7ed;
+        border:1.5px solid #fed7aa;
+        border-radius:10px;
+        padding:9px 12px;
+        cursor:pointer;
+        font-family:'Inter',sans-serif;
+        font-size:13px;
+        font-weight:600;
+        color:#9a3412;
+        transition:background .15s,border-color .15s;
+    }
+    .lab-checkbox:hover{ background:#ffedd5; }
+    .lab-checkbox input{
+        width:auto;
+        accent-color:#ea580c;
+    }
+
+    .form-acciones{
+        display:flex;
+        gap:12px;
+        margin-top:30px;
+    }
+    .btn-guardar{
+        background:#1d6fa5;
+        color:#fff;
+        border:none;
+        padding:12px 28px;
+        border-radius:10px;
+        font-family:'Inter',sans-serif;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        transition:background .15s;
+    }
+    .btn-guardar:hover{ background:#16567f; }
+    .btn-cancelar{
+        background:#f0f2f7;
+        color:#5a6282;
+        border:none;
+        padding:12px 28px;
+        border-radius:10px;
+        font-family:'Inter',sans-serif;
+        font-size:14px;
+        font-weight:600;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        transition:background .15s;
+    }
+    .btn-cancelar:hover{ background:#e2e6ef; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+    <div class="banner-marca">
+        <svg class="banner-arbol" width="30" height="30" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="26" cy="26" r="24" stroke="#d34240" stroke-width="2.5" fill="none"/>
+            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="#d34240"/>
+            <polygon points="26,10 20,22 32,22" fill="#d34240"/>
+            <polygon points="26,16 18,28 34,28" fill="#d34240"/>
+            <polygon points="26,22 17,34 35,34" fill="#d34240"/>
+        </svg>
+        <div class="banner-marca-texto">
+            <span class="banner-marca-nombre">esan<span class="banner-marca-barra">|</span>data</span>
+            <span class="banner-marca-sub">Tecnología de Información</span>
+        </div>
+    </div>
+
+    <div class="banner-flecha">
+        <span class="banner-subtitulo">Panel de Administración</span>
+
+        <div class="banner-usuario">
+            <i class="ti ti-user-circle" aria-hidden="true"></i>
+            <span class="banner-usuario-nombre">{{ session.nombre or session.usuario }}</span>
+            <a href="{{ url_for('logout') }}" class="banner-logout" title="Cerrar sesión">
+                <i class="ti ti-logout" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="form-wrap">
+    <div class="form-panel">
+
+        <div class="form-titulo">
+            <i class="ti ti-apps"></i>
+            {{ 'Editar Programa' if programa else 'Nuevo Programa' }}
+        </div>
+
+        <form method="POST">
+
+            <div class="form-grid">
+                <div class="full">
+                    <label for="nombre">Nombre del programa</label>
+                    <input type="text" id="nombre" name="nombre" required
+                           value="{{ programa.nombre if programa else '' }}">
+                </div>
+
+                <div>
+                    <label for="version">Versión</label>
+                    <input type="text" id="version" name="version"
+                           value="{{ programa.version if programa else '' }}">
+                </div>
+
+                <div>
+                    <label for="licencia">Tipo de licencia</label>
+                    <input type="text" id="licencia" name="licencia"
+                           value="{{ programa.licencia if programa else '' }}"
+                           placeholder="Licenciado / Gratuito / etc.">
+                </div>
+
+                <div>
+                    <label for="cantidad">Cantidad de licencias</label>
+                    <input type="text" id="cantidad" name="cantidad"
+                           value="{{ programa.cantidad if programa else '' }}"
+                           placeholder="Número o 'Ilimitado'">
+                </div>
+            </div>
+
+            <div class="labs-titulo">
+                <i class="ti ti-building"></i> Laboratorios donde está instalado
+            </div>
+
+            <div class="labs-grid">
+                {% for lab in laboratorios %}
+                <label class="lab-checkbox">
+                    <input type="checkbox" name="laboratorios" value="{{ lab }}"
+                           {% if lab in labs_actuales %}checked{% endif %}>
+                    {{ lab }}
+                </label>
+                {% endfor %}
+            </div>
+
+            <div class="form-acciones">
+                <button type="submit" class="btn-guardar">
+                    <i class="ti ti-check"></i> Guardar
+                </button>
+                <a href="{{ url_for('admin_programas') }}" class="btn-cancelar">
+                    <i class="ti ti-x"></i> Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
