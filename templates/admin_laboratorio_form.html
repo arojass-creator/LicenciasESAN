@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>{{ 'Editar' if laboratorio else 'Nuevo' }} Laboratorio — ESAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+<style>
+    .form-wrap{ width:95vw; max-width:700px; margin:0 auto 30px auto; }
+    .form-panel{ background:#fff; border-radius:20px; border:1px solid #e2e8f0; box-shadow:0 8px 20px rgba(0,0,0,.08); padding:28px 32px; }
+    .form-titulo{ font-family:'Poppins',sans-serif; font-size:22px; font-weight:700; color:#1e3a8a; display:flex; align-items:center; gap:10px; margin-bottom:24px; }
+    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .form-grid .full{ grid-column:1 / -1; }
+    label{ display:block; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:#5a6282; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+    input[type=text], input[type=number]{ width:100%; padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; outline:none; transition:border-color .15s; }
+    input:focus{ border-color:#1d6fa5; }
+    .hint{ font-size:11px; color:#94a3b8; margin-top:4px; }
+    .estado-info{
+        display:flex; align-items:center; gap:10px;
+        background:#f0f2f7; border-radius:10px; padding:12px 16px;
+        margin-top:6px; font-family:'Inter',sans-serif; font-size:13px; color:#5a6282;
+    }
+    .estado-info i{ font-size:18px; color:#1d6fa5; }
+    .form-acciones{ display:flex; gap:12px; margin-top:30px; }
+    .btn-guardar{ background:#1d6fa5; color:#fff; border:none; padding:12px 28px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:background .15s; }
+    .btn-guardar:hover{ background:#16567f; }
+    .btn-cancelar{ background:#f0f2f7; color:#5a6282; border:none; padding:12px 28px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:background .15s; }
+    .btn-cancelar:hover{ background:#e2e6ef; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+    <div class="banner-marca">
+        <svg class="banner-arbol" width="30" height="30" viewBox="0 0 52 52" fill="none">
+            <circle cx="26" cy="26" r="24" stroke="#d34240" stroke-width="2.5" fill="none"/>
+            <rect x="24.5" y="36" width="3" height="6" rx="1" fill="#d34240"/>
+            <polygon points="26,10 20,22 32,22" fill="#d34240"/>
+            <polygon points="26,16 18,28 34,28" fill="#d34240"/>
+            <polygon points="26,22 17,34 35,34" fill="#d34240"/>
+        </svg>
+        <div class="banner-marca-texto">
+            <span class="banner-marca-nombre">esan<span class="banner-marca-barra">|</span>data</span>
+            <span class="banner-marca-sub">Tecnología de Información</span>
+        </div>
+    </div>
+    <div class="banner-flecha">
+        <span class="banner-subtitulo">Panel de Administración</span>
+        <div class="banner-usuario">
+            <i class="ti ti-user-circle" aria-hidden="true"></i>
+            <span class="banner-usuario-nombre">{{ session.nombre or session.usuario }}</span>
+            <a href="{{ url_for('logout') }}" class="banner-logout" title="Cerrar sesión">
+                <i class="ti ti-logout" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="form-wrap">
+    <div class="form-panel">
+
+        <div class="form-titulo">
+            <i class="ti ti-building"></i>
+            {{ 'Editar Laboratorio' if laboratorio else 'Nuevo Laboratorio' }}
+        </div>
+
+        <form method="POST">
+
+            <div class="form-grid">
+                <div class="full">
+                    <label for="nombre">Nombre del laboratorio</label>
+                    <input type="text" id="nombre" name="nombre" required
+                           placeholder="ej. A-303"
+                           value="{{ laboratorio.nombre if laboratorio else '' }}">
+                    <p class="hint">Este nombre debe coincidir con la columna usada en los programas. Si lo cambias, se actualizará automáticamente en todos los programas existentes.</p>
+                </div>
+
+                <div>
+                    <label for="capacidad">Aforo / Capacidad</label>
+                    <input type="text" id="capacidad" name="capacidad"
+                           placeholder="ej. 31"
+                           value="{{ laboratorio.capacidad if laboratorio else '' }}">
+                </div>
+
+                <div>
+                    <label for="tipo">Tipo de laboratorio</label>
+                    <input type="text" id="tipo" name="tipo"
+                           placeholder="ej. Ingenieria, Robotica, Ofimatica"
+                           value="{{ laboratorio.tipo if laboratorio else '' }}">
+                </div>
+
+                <div>
+                    <label for="piso">Piso</label>
+                    <input type="text" id="piso" name="piso"
+                           placeholder="ej. 3"
+                           value="{{ laboratorio.piso if laboratorio else '' }}">
+                </div>
+
+                <div>
+                    <label for="edificio">Edificio</label>
+                    <input type="text" id="edificio" name="edificio"
+                           placeholder="ej. A"
+                           value="{{ laboratorio.edificio if laboratorio else '' }}">
+                </div>
+            </div>
+
+            {% if laboratorio %}
+            <div class="estado-info">
+                <i class="ti ti-info-circle"></i>
+                Estado actual:
+                <strong style="color:{{ '#166534' if laboratorio.estado == 'ACTIVO' else '#991b1b' }};">
+                    {{ laboratorio.estado }}
+                </strong>
+                — el estado se cambia desde el botón en la lista de laboratorios, no en este formulario.
+            </div>
+            {% endif %}
+
+            <div class="form-acciones">
+                <button type="submit" class="btn-guardar">
+                    <i class="ti ti-check"></i> Guardar
+                </button>
+                <a href="{{ url_for('admin_laboratorios') }}" class="btn-cancelar">
+                    <i class="ti ti-x"></i> Cancelar
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
