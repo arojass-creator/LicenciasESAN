@@ -403,6 +403,157 @@ def admin_programa_eliminar(id_programa):
     return redirect(url_for("admin_programas"))
 
 
+@app.route("/admin/buscar-usuario")
+@admin_requerido
+def buscar_usuario_ad():
+    """Busca un usuario en el AD por nombre de usuario, nombre completo o correo."""
+    from auth_ldap import LDAP_SERVER, LDAP_PORT, USE_SSL, DOMINIO_UPN, BASE_DN
+    from ldap3 import Server, Connection, ALL, SUBTREE
+    from ldap3.core.exceptions import LDAPException
+
+    termino = request.args.get("usuario", "").strip()
+    password_admin = request.args.get("pwd", "").strip()
+
+    if not termino:
+        return jsonify({"ok": False, "error": "Término vacío"})
+
+    # Construir filtro flexible: busca por sAMAccountName, displayName o mail
+    filtro = f"(|(sAMAccountName={termino})(mail={termino}@{DOMINIO_UPN})(displayName=*{termino}*))"
+
+    # Usar las credenciales del admin logueado para hacer el bind
+    upn_admin = f"{session['usuario']}@{DOMINIO_UPN}"
+
+    # La contraseña no está en sesión por seguridad — usamos cuenta de servicio
+    # Si no hay cuenta de servicio, intentamos bind simple con UPN del buscado
+    resultados = []
+
+    try:
+        server = Server(LDAP_SERVER, port=LDAP_PORT, use_ssl=USE_SSL, get_info=ALL)
+
+        # Intentar con la contraseña enviada desde el formulario
+        if password_admin:
+            conn = Connection(server, user=upn_admin, password=password_admin, auto_bind=True)
+        else:
+            # Bind anónimo como fallback
+            conn = Connection(server, auto_bind=True)
+
+        conn.search(
+            search_base=BASE_DN,
+            search_filter=filtro,
+            search_scope=SUBTREE,
+            attributes=["displayName", "mail", "sAMAccountName"],
+            size_limit=10,
+        )
+
+        for entry in conn.entries:
+            sam  = str(entry.sAMAccountName.value) if entry.sAMAccountName.value else ""
+            nom  = str(entry.displayName.value)    if entry.displayName.value    else sam
+            mail = str(entry.mail.value)            if entry.mail.value            else f"{sam}@{DOMINIO_UPN}"
+            resultados.append({"usuario": sam, "nombre": nom, "correo": mail})
+
+        conn.unbind()
+        return jsonify({"ok": True, "resultados": resultados})
+
+    except LDAPException:
+        # Bind falló — devolver correo estimado
+        return jsonify({
+            "ok": True,
+            "resultados": [{
+                "usuario": termino,
+                "nombre":  "",
+                "correo":  f"{termino}@{DOMINIO_UPN}",
+                "estimado": True
+            }]
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
+
+
+@app.route("/admin/usuarios")
+@admin_requerido
+def admin_usuarios():
+    try:
+        df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="USUARIOS")
+        df.columns = [c.strip().upper() for c in df.columns]
+        usuarios = []
+        for i, fila in df.iterrows():
+            usuarios.append({
+                "id":      i,
+                "usuario": str(fila.get("USUARIO", "")).strip(),
+                "nombre":  str(fila.get("NOMBRE", "")).strip(),
+                "rol":     str(fila.get("ROL", "viewer")).strip(),
+                "activo":  str(fila.get("ACTIVO", "SI")).strip().upper(),
+            })
+    except Exception:
+        usuarios = []
+    return render_template("admin_usuarios.html", usuarios=usuarios)
+
+
+@app.route("/admin/usuario/nuevo", methods=["GET", "POST"])
+@admin_requerido
+def admin_usuario_nuevo():
+    if request.method == "POST":
+        try:
+            df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="USUARIOS")
+            df.columns = [c.strip().upper() for c in df.columns]
+        except Exception:
+            df = pd.DataFrame(columns=["USUARIO", "NOMBRE", "ROL", "ACTIVO"])
+
+        nueva = {
+            "USUARIO": request.form.get("usuario", "").strip().lower(),
+            "NOMBRE":  request.form.get("nombre", "").strip(),
+            "ROL":     request.form.get("rol", "viewer").strip(),
+            "ACTIVO":  "SI" if request.form.get("activo") == "SI" else "NO",
+        }
+        df = pd.concat([df, pd.DataFrame([nueva])], ignore_index=True)
+        with pd.ExcelWriter(ARCHIVO_EXCEL, engine="openpyxl", mode="a",
+                            if_sheet_exists="replace") as writer:
+            df.to_excel(writer, sheet_name="USUARIOS", index=False)
+        return redirect(url_for("admin_usuarios"))
+
+    return render_template("admin_usuario_form.html", usuario=None)
+
+
+@app.route("/admin/usuario/<int:id_usuario>/editar", methods=["GET", "POST"])
+@admin_requerido
+def admin_usuario_editar(id_usuario):
+    df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="USUARIOS")
+    df.columns = [c.strip().upper() for c in df.columns]
+
+    if request.method == "POST":
+        df.at[id_usuario, "USUARIO"] = request.form.get("usuario", "").strip().lower()
+        df.at[id_usuario, "NOMBRE"]  = request.form.get("nombre", "").strip()
+        df.at[id_usuario, "ROL"]     = request.form.get("rol", "viewer").strip()
+        df.at[id_usuario, "ACTIVO"]  = "SI" if request.form.get("activo") == "SI" else "NO"
+        with pd.ExcelWriter(ARCHIVO_EXCEL, engine="openpyxl", mode="a",
+                            if_sheet_exists="replace") as writer:
+            df.to_excel(writer, sheet_name="USUARIOS", index=False)
+        return redirect(url_for("admin_usuarios"))
+
+    fila = df.iloc[id_usuario]
+    usuario_actual = {
+        "id":      id_usuario,
+        "usuario": str(fila.get("USUARIO", "")).strip(),
+        "nombre":  str(fila.get("NOMBRE", "")).strip(),
+        "rol":     str(fila.get("ROL", "viewer")).strip(),
+        "activo":  str(fila.get("ACTIVO", "SI")).strip().upper(),
+    }
+    return render_template("admin_usuario_form.html", usuario=usuario_actual)
+
+
+@app.route("/admin/usuario/<int:id_usuario>/toggle", methods=["POST"])
+@admin_requerido
+def admin_usuario_toggle(id_usuario):
+    df = pd.read_excel(ARCHIVO_EXCEL, sheet_name="USUARIOS")
+    df.columns = [c.strip().upper() for c in df.columns]
+    actual = str(df.at[id_usuario, "ACTIVO"]).strip().upper()
+    df.at[id_usuario, "ACTIVO"] = "NO" if actual == "SI" else "SI"
+    with pd.ExcelWriter(ARCHIVO_EXCEL, engine="openpyxl", mode="a",
+                        if_sheet_exists="replace") as writer:
+        df.to_excel(writer, sheet_name="USUARIOS", index=False)
+    return redirect(url_for("admin_usuarios"))
+
+
 if __name__ == "__main__":
 
     app.run(
