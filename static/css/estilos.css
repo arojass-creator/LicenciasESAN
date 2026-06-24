@@ -134,7 +134,11 @@
 
     align-items:center;
 
+    justify-content:space-between;
+
     padding-left:46px;
+
+    padding-right:24px;
 
     position:relative;
 
@@ -154,6 +158,71 @@
     color:#ffffff;
 
     letter-spacing:0.3px;
+}
+
+/* Usuario logueado + botón de cerrar sesión */
+
+.banner-usuario{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    flex-shrink:0;
+}
+
+.banner-usuario i.ti-user-circle{
+
+    font-size:22px;
+
+    color:rgba(255,255,255,.85);
+}
+
+.banner-usuario-nombre{
+
+    font-family:'Inter',sans-serif;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#ffffff;
+
+    white-space:nowrap;
+}
+
+.banner-logout{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:34px;
+
+    height:34px;
+
+    border-radius:8px;
+
+    color:#ffffff;
+
+    font-size:18px;
+
+    text-decoration:none;
+
+    background:rgba(255,255,255,.12);
+
+    transition:background .15s;
+
+    flex-shrink:0;
+}
+
+.banner-logout:hover{
+
+    background:rgba(255,255,255,.25);
 }
 
 .banner-menu{
